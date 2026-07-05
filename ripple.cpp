@@ -926,8 +926,11 @@ static void TVPInitRippleTransformFuncs()
 		if(x>=srcwidth) x = srcwidth - 1 - (x - srcwidth); \
 		if(y>=srcheight) y = srcheight - 1 - (y - srcheight); \
 	}
-#define TVP_RIPPLE_CALC_OFS tjs_uint ofs = \
-		x*sizeof(tjs_uint32) + y*pitch;
+#define TVP_RIPPLE_CALC_OFS tjs_int ofs = \
+		(tjs_int)(x*sizeof(tjs_uint32)) + y*pitch;
+	// ofs は符号付きでなければならない: 転送元が負ピッチ (ボトムアップ) の
+	// 場合 y*pitch が負になり、符号なしだと巨大値に化けて src1/src2 + ofs が
+	// 範囲外アクセス→クラッシュする (内側の _c_f/_c_b は元々 tjs_int で正常)。
 //---------------------------------------------------------------------------
 static void TVPRippleTransform_f_a_e(
 	const tjs_uint16 *displacemap, const tjs_uint16 *driftmap, tjs_uint32 *dest,
