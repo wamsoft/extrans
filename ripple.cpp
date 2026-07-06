@@ -399,8 +399,11 @@ static void TVPClearRippleTableCache()
 		s1 = *(const tjs_uint32*)(src1 + ofs); s2 = *(const tjs_uint32*)(src2 + ofs); \
 		s1_ = s1 & 0xff00ff; s1_ = (s1_ + (((s2 & 0xff00ff) - s1_) * ratio >> 8)) & 0xff00ff; \
 		s2 &= 0xff00; s1 &= 0xff00; \
-		dest[i] = s1_ | ((s1 + ((s2 - s1) * ratio >> 8)) & 0xff00); \
+		dest[i] = 0xff000000 | s1_ | ((s1 + ((s2 - s1) * ratio >> 8)) & 0xff00); \
 	}
+	// alpha は 0xff (不透明) を明示的に付与する。元の実装は RGB のみ書いて
+	// alpha=0 になり、krkrz Z のアルファ合成 DrawDevice では透過→真っ黒に
+	// なる (ripple は元々不透明画像専用。crossfade 等も不透明で出力する)。
 //---------------------------------------------------------------------------
 static void TVPRippleTransform_c_f(
 	const tjs_uint16 *displacemap, const tjs_uint16 *driftmap, tjs_uint32 *dest,
