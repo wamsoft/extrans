@@ -6,6 +6,9 @@
 
 #include "tp_stub.h"
 #include <math.h>
+#ifdef _M_IX86
+#include <intrin.h>	// __cpuid (MMX/SSE 判定用)
+#endif
 #include "ripple.h"
 #include "common.h"
 
@@ -901,14 +904,20 @@ static void TVPInitRippleTransformFuncs()
 {
 #ifdef _M_IX86
 	// 32bit x86 のみ MMX/EMMX アセンブラ版へ差し替え。それ以外は C 版のまま。
-	tjs_uint32 cputype = TVPGetCPUType();
-	if(cputype & TVP_CPU_HAS_MMX)
+	// 旧来は本体の TVPGetCPUType() で判定していたが、GENERIC ビルドの
+	// tp_stub には存在しないため __cpuid で直接判定する。
+	// EMMX 版が追加で使うのは prefetcht0 (SSE) のみなので SSE で判定。
+	int regs[4] = {0};
+	__cpuid(regs, 1);
+	const bool has_mmx = (regs[3] & (1 << 23)) != 0;
+	const bool has_sse = (regs[3] & (1 << 25)) != 0;
+	if(has_mmx)
 	{
 		// MMX が使用可能な場合
 		TVPRippleTransform_f = TVPRippleTransform_mmx_f;
 		TVPRippleTransform_b = TVPRippleTransform_mmx_b;
 	}
-	if((cputype & TVP_CPU_HAS_MMX) && (cputype & TVP_CPU_HAS_EMMX))
+	if(has_mmx && has_sse)
 	{
 		// MMX/EMMX が使用可能な場合
 		// EMMX バージョンは MMX バージョンに prefetch 命令を追加しただけだが
