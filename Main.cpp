@@ -10,6 +10,9 @@
 // 版でも問題なく動作する。
 //---------------------------------------------------------------------------
 #include "tp_stub.h"
+// ONV2LINK/ONV2UNLINK マクロ (静的リンク時に onV2Link_<プラグイン名> へ
+// リネームし、複数プラグイン同居時のシンボル衝突を避ける) のため include
+#include "simplebinder.hpp"
 
 #include "wave.h"
 #include "mosaic.h"
@@ -22,7 +25,7 @@
 //   simplebinder/v2link.cpp の V2Link から呼ばれる。この時点で
 //   TVPInitImportStub は実行済みで、吉里吉里内部 API が使用可能。
 //---------------------------------------------------------------------------
-bool onV2Link()
+bool ONV2LINK()
 {
 	// トランジションハンドラプロバイダの登録
 	RegisterWaveTransHandlerProvider();
@@ -37,7 +40,7 @@ bool onV2Link()
 // プラグインアンリンク時の処理
 //   simplebinder/v2link.cpp の V2Unlink から呼ばれる。
 //---------------------------------------------------------------------------
-bool onV2Unlink()
+bool ONV2UNLINK()
 {
 	// トランジションハンドラプロバイダの登録削除
 	UnregisterWaveTransHandlerProvider();
