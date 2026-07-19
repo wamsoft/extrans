@@ -11,6 +11,7 @@
 #endif
 #include "ripple.h"
 #include "common.h"
+#include <cstring>
 
 //---------------------------------------------------------------------------
 /*
